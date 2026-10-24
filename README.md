@@ -63,6 +63,22 @@ Fourteen Jupyter notebooks. Eight are the pedagogical chapter walkthroughs; six 
 | `notebooks/ch8-optimization.ipynb` | Route each node to the cheapest model that meets its bar; budget the specialist fleet against KV-cache and latency; scope each persona to its authorized subgraph. |
 | `notebooks/spike-*.ipynb` (×6) | Seam-validation spikes: RAG-MCP tool selection, bi-temporal edges, Graphiti incremental update, hierarchical memory, Letta failure modes, and the execution graph. |
 
+### Learning path: three tiers on a real Neo4j graph
+
+The originals above are dense and use `moto`-mocked AWS. If you are new to GraphRAG, learn the same chapters in three steps. All tiers use the same skills and run against a **real Neo4j** started with `docker compose -f docker-compose/docker-compose.yml up -d` (browser UI at <http://localhost:7474>, login `neo4j` / `password`). Each notebook wipes and reloads the graph on start, so run one at a time.
+
+| Tier | Folder | Style |
+|---|---|---|
+| 1 — Beginner | [`notebooks_simplified/`](notebooks_simplified) | Heavy explanation, core skills, simple Cypher. Ch1–8 + the six spikes. |
+| 2 — Intermediate | [`notebooks_intermediate_simplified/`](notebooks_intermediate_simplified) | Output anatomy, Cypher-derived skill inputs, a hand-written pipeline, guided "your turn" exercises, one vibe-coding tip. Ch1–8. |
+| 3 — Advanced | [`notebooks_advanced_simplified/`](notebooks_advanced_simplified) | Every skill, a mini agent with traces stored in the graph, benchmarks, vibe-coding corners, experiments, plus a ch9 capstone. |
+
+Each notebook starts with a learning-path banner linking to its siblings in the other tiers.
+
+**Tier 4 (real LLM, optional).** [`notebooks_advanced/`](notebooks_advanced) replaces every stand-in with real OpenAI `gpt-4o`, real embeddings with a Neo4j vector index, a real function-calling agent and real Neo4j RBAC, and treats evaluation and LLM-as-a-Judge as first-class (about $1.14 for all nine notebooks, measured). It needs an `OPENAI_API_KEY` in its `.env`. [`notebooks_advanced_with_observability/`](notebooks_advanced_with_observability) is the same set with **Arize Phoenix** or **DeepEval** observability, switched by `OBSERVABILITY_BACKEND` in its `.env`.
+
+**Docker stacks.** All compose files, ports, pinned versions and data folders are documented in [`docker-compose/README.md`](docker-compose/README.md): the plain Neo4j (7687) for tiers 1–4, plus separate Phoenix and DeepEval stacks, each with its own Neo4j (7688 / 7689) so nothing clashes.
+
 ## For coding agents: how to leverage the book through this repo
 
 This repo is designed to be driven by a coding agent (Claude Code, Cursor, Gemini CLI, Windsurf, OpenCode) or from a plain shell. The book supplies the *why*; a skill supplies the *decision procedure and the deterministic computation*.

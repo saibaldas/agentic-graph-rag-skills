@@ -1,0 +1,37 @@
+# Neo4j for notebooks_simplified / _intermediate_simplified / _advanced_simplified / notebooks_advanced.
+#   docker compose -f docker-compose/docker-compose.yml up -d        (bolt://localhost:7687, UI http://localhost:7474)
+#
+# docker-compose folder map (every stack has its OWN Neo4j, ports and data folders, so none of them clash):
+#   docker-compose.yml           project "agentic-graph-rag-neo4j"             Neo4j 7687/7474   data in ./volumes/justneo4j/...
+#   docker-compose.phoenix.yml   project "agentic-graph-rag-obs-phoenix"       Neo4j 7688/7475   data in ./volumes/phoenix/...   + Phoenix UI 6006
+#   docker-compose.deepeval.yml  project "agentic-graph-rag-obs-deepeval"      Neo4j 7689/7476   data in ./volumes/deepeval/...  + DeepEval 8765
+name: agentic-graph-rag-neo4j
+
+services:
+  neo4j:
+    image: neo4j:5.26.32-enterprise   # pinned: do not float to a newer 5.26.x / 2026.x by accident
+    container_name: neo4j-5.26-ent-agentic-graph-rag-skills
+    environment:
+      # Format: username/password (Change 'your_strong_password' before running)
+      NEO4J_AUTH: 'neo4j/password'
+      NEO4J_PLUGINS: '["apoc","graph-data-science"]'
+      NEO4J_ACCEPT_LICENSE_AGREEMENT: 'yes'
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    mem_limit: 32g
+    volumes:
+      - ./volumes/justneo4j/data:/data:rw
+      - ./volumes/justneo4j/logs:/logs:rw
+      - ./volumes/justneo4j/import:/var/lib/neo4j/import:rw
+      - ./volumes/justneo4j/plugins:/plugins:rw
+    ports:
+      - 7474:7474 # HTTP Browser UI
+      - 7473:7473 # HTTP Alternate Port
+      - 7687:7687 # Bolt Protocol (Driver connections)
+
+      # Optional: Performance adjustments (uncomment if needed)
+      # - NEO4J_server_memory_heap_initial__size=512m
+      # - NEO4J_server_memory_heap_max__size=1G
+      # - NEO4J_server_memory_pagecache_size=512m

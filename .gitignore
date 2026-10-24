@@ -17,3 +17,9 @@ Thumbs.db
 
 # Internal work log — kept local, not part of the public companion repo
 PLAN.md
+
+# Neo4j runtime data: every compose stack keeps its data under docker-compose/volumes/
+notebooks_simplified/.run.lock
+notebooks_advanced/.run.lock
+notebooks_advanced_with_observability/.run.lock
+docker-compose/volumes/

@@ -8,3 +8,18 @@ moto[cloudwatch,logs,s3,lambda,dynamodb,xray,ecs,iam,sns,sqs]>=5.0.0
 # Notebook execution
 jupyter>=1.1.0
 ipykernel>=6.29.0
+
+# Learning-path notebooks (notebooks_simplified / _intermediate_ / _advanced_): real Neo4j
+neo4j>=5.26.0
+# Only needed to rebuild the simplified notebooks from their _src/ sources
+nbformat>=5.9.0
+nbclient>=0.10.0
+
+# notebooks_advanced (real LLM + embeddings; needs OPENAI_API_KEY)
+openai>=1.50.0
+python-dotenv>=1.0.0
+
+# notebooks_advanced_with_observability (Phoenix tracing from the notebooks; DeepEval itself runs inside its Docker container)
+openinference-instrumentation-openai>=0.1.20
+opentelemetry-sdk>=1.25.0
+opentelemetry-exporter-otlp-proto-http>=1.25.0

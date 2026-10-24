@@ -1,0 +1,56 @@
+# Observability stack B: DeepEval (local) + its OWN Neo4j, for notebooks_advanced_with_observability
+# (.env: OBSERVABILITY_BACKEND=deepeval).
+#
+#   docker compose --env-file notebooks_advanced_with_observability/.env -f docker-compose/docker-compose.deepeval.yml up -d --build
+#
+#   DeepEval dashboard  http://localhost:8765
+#   Neo4j browser       http://localhost:7476      bolt://localhost:7689   (neo4j / password)
+#
+# `--env-file` hands your OPENAI_API_KEY to the DeepEval container (its metrics call OpenAI as the judge).
+# DeepEval is a library (its hosted dashboard is the paid Confident AI cloud), so ./deepeval wraps the open-source
+# library in a small HTTP service + local dashboard. Nothing is sent to Confident AI.
+# Own Neo4j on its own ports + ./volumes/deepeval/* folders: no clash with docker-compose.yml or docker-compose.phoenix.yml.
+name: agentic-graph-rag-obs-deepeval
+
+services:
+  neo4j:
+    image: neo4j:5.26.32-enterprise
+    container_name: obs-deepeval-neo4j-agentic-graph-rag-skills
+    environment:
+      NEO4J_AUTH: 'neo4j/${NEO4J_PASSWORD:-password}'
+      NEO4J_PLUGINS: '["apoc","graph-data-science"]'
+      NEO4J_ACCEPT_LICENSE_AGREEMENT: 'yes'
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    mem_limit: 8g
+    volumes:
+      - ./volumes/deepeval/data:/data:rw
+      - ./volumes/deepeval/logs:/logs:rw
+      - ./volumes/deepeval/import:/var/lib/neo4j/import:rw
+      - ./volumes/deepeval/plugins:/plugins:rw
+    ports:
+      - 7476:7474   # Neo4j browser
+      - 7689:7687   # Bolt (drivers / notebooks)
+
+  deepeval:
+    build:
+      context: ./deepeval
+      args:
+        PYTHON_TAG: "3.11.17-slim"   # pinned base image
+        DEEPEVAL_VERSION: "4.3.1"    # pinned library version
+    image: agentic-graph-rag/deepeval-local:4.3.1
+    container_name: obs-deepeval-ui-agentic-graph-rag-skills
+    ports:
+      - "8765:8765"
+    environment:
+      OPENAI_API_KEY: "${OPENAI_API_KEY:?pass your key with --env-file notebooks_advanced_with_observability/.env (see the top of this file)}"
+      DEEPEVAL_MODEL: ${DEEPEVAL_MODEL:-gpt-4o-mini}   # the model DeepEval uses as its judge
+      DEEPEVAL_TELEMETRY_OPT_OUT: "YES"
+    volumes:
+      - deepeval_data:/data    # JSONL history of traces, judgements, eval runs and metric results
+
+volumes:
+  deepeval_data:
+    name: agentic-graph-rag-obs-deepeval-data
