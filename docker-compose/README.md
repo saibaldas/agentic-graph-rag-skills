@@ -17,9 +17,9 @@ Neo4j login for all three: `neo4j` / `password` (Enterprise edition, needed for 
 |---|---|
 | `notebooks_simplified`, `notebooks_intermediate_simplified`, `notebooks_advanced_simplified`, `notebooks_advanced` | **Just Neo4j** (7687, the default) |
 | `notebooks_advanced_with_observability` with `OBSERVABILITY_BACKEND=phoenix` (or `both`) | **Phoenix** stack (notebooks use Neo4j on 7688) |
-| `notebooks_advanced_with_observability_plus_changes` (same `OBSERVABILITY_BACKEND` rules) | the same stack as the row above/below that matches the setting (Phoenix 7688 by default) |
 | `notebooks_advanced_with_observability` with `OBSERVABILITY_BACKEND=deepeval` | **DeepEval** stack (notebooks use Neo4j on 7689) |
 | `notebooks_advanced_with_observability` with `OBSERVABILITY_BACKEND=none` | **Just Neo4j** |
+| `notebooks_advanced_with_observability_plus_changes` | same rules as the three rows above, driven by its own `.env` (Phoenix by default) |
 
 The notebooks pick the matching Neo4j from `OBSERVABILITY_BACKEND` automatically; set `NEO4J_URI` in their `.env` to override.
 See [`../notebooks_advanced_with_observability/README.md`](../notebooks_advanced_with_observability/README.md).
@@ -34,13 +34,39 @@ docker compose -f docker-compose/docker-compose.yml up -d
 docker compose -f docker-compose/docker-compose.phoenix.yml up -d
 
 # DeepEval + its own Neo4j  (--env-file hands your OPENAI_API_KEY to the DeepEval container; --build builds ./deepeval)
-docker compose --env-file notebooks_advanced_with_observability/.env -f docker-compose/docker-compose.deepeval.yml up -d --build
+docker compose --env-file notebooks_advanced_with_observability_plus_changes/.env -f docker-compose/docker-compose.deepeval.yml up -d --build
 
 # Stop a stack (data is kept)
 docker compose -f docker-compose/docker-compose.phoenix.yml down
 # ...and also delete its Docker volume (stored Phoenix traces / DeepEval history)
 docker compose -f docker-compose/docker-compose.phoenix.yml down -v
 ```
+
+## Stopping and removing a stack (`docker compose down`)
+
+Every stack is a separate Compose **project**, so you stop one by pointing `down` at its own file. The other stacks keep
+running. Run these from the repo root.
+
+| To stop… | Command |
+|---|---|
+| **Just Neo4j** | `docker compose -f docker-compose/docker-compose.yml down` |
+| **Phoenix** (+ its Neo4j) | `docker compose -f docker-compose/docker-compose.phoenix.yml down` |
+| **DeepEval** (+ its Neo4j) | `docker compose -f docker-compose/docker-compose.deepeval.yml down` |
+
+Notes:
+- **No key needed to stop DeepEval.** `down`, `stop` and `ps` work without `OPENAI_API_KEY`. Only `up` needs
+  `--env-file` (otherwise the container starts but its DeepEval metrics cannot call OpenAI). The compose file previously
+  refused to load without the key, which made plain `down` fail; that is fixed.
+- **Plain `down` keeps your data.** It removes the containers and the network, but not the Neo4j data under
+  `docker-compose/volumes/<stack>/` (a bind-mounted folder) nor the named Docker volume.
+- **`down -v` also deletes the named Docker volume** (Phoenix traces, DeepEval history). It never touches the
+  `docker-compose/volumes/<stack>/` folders; to reset a Neo4j database, stop the stack and delete that stack's `data` folder.
+- **Stop without removing** (keep the containers, restart quickly): `docker compose -f <file> stop`, then `start`.
+- **Stop everything:** run the three `down` commands above, one after another.
+- **From Docker Desktop:** the stacks appear under *Containers* as the projects `agentic-graph-rag-neo4j`,
+  `agentic-graph-rag-obs-phoenix` and `agentic-graph-rag-obs-deepeval`. Stopping or deleting a project there is the same as `stop` / `down`.
+- **No file at hand?** Use the project name instead: `docker compose -p agentic-graph-rag-obs-phoenix down`.
+- **See what is running:** `docker compose ls` lists the projects; `docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"` lists the containers.
 
 The first start of a Neo4j container downloads the APOC and Graph Data Science plugins into its `volumes/<stack>/plugins`
 folder, so allow about a minute before connecting. Check readiness with

@@ -1,7 +1,8 @@
 # Observability stack B: DeepEval (local) + its OWN Neo4j, for notebooks_advanced_with_observability
 # (.env: OBSERVABILITY_BACKEND=deepeval).
 #
-#   docker compose --env-file notebooks_advanced_with_observability/.env -f docker-compose/docker-compose.deepeval.yml up -d --build
+#   docker compose --env-file notebooks_advanced_with_observability_plus_changes/.env -f docker-compose/docker-compose.deepeval.yml up -d --build
+#   docker compose -f docker-compose/docker-compose.deepeval.yml down        (no key needed to stop it)
 #
 #   DeepEval dashboard  http://localhost:8765
 #   Neo4j browser       http://localhost:7476      bolt://localhost:7689   (neo4j / password)
@@ -45,7 +46,7 @@ services:
     ports:
       - "8765:8765"
     environment:
-      OPENAI_API_KEY: "${OPENAI_API_KEY:?pass your key with --env-file notebooks_advanced_with_observability/.env (see the top of this file)}"
+      OPENAI_API_KEY: "${OPENAI_API_KEY:-}"  # empty is fine for down/stop/ps; DeepEval metrics need a real key from --env-file on up
       DEEPEVAL_MODEL: ${DEEPEVAL_MODEL:-gpt-4o-mini}   # the model DeepEval uses as its judge
       DEEPEVAL_TELEMETRY_OPT_OUT: "YES"
     volumes:
