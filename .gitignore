@@ -22,4 +22,5 @@ PLAN.md
 notebooks_simplified/.run.lock
 notebooks_advanced/.run.lock
 notebooks_advanced_with_observability/.run.lock
+notebooks_advanced_with_observability_plus_changes/.run.lock
 docker-compose/volumes/

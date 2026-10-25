@@ -17,6 +17,7 @@ Neo4j login for all three: `neo4j` / `password` (Enterprise edition, needed for 
 |---|---|
 | `notebooks_simplified`, `notebooks_intermediate_simplified`, `notebooks_advanced_simplified`, `notebooks_advanced` | **Just Neo4j** (7687, the default) |
 | `notebooks_advanced_with_observability` with `OBSERVABILITY_BACKEND=phoenix` (or `both`) | **Phoenix** stack (notebooks use Neo4j on 7688) |
+| `notebooks_advanced_with_observability_plus_changes` (same `OBSERVABILITY_BACKEND` rules) | the same stack as the row above/below that matches the setting (Phoenix 7688 by default) |
 | `notebooks_advanced_with_observability` with `OBSERVABILITY_BACKEND=deepeval` | **DeepEval** stack (notebooks use Neo4j on 7689) |
 | `notebooks_advanced_with_observability` with `OBSERVABILITY_BACKEND=none` | **Just Neo4j** |
 
